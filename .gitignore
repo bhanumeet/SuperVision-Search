@@ -1,0 +1,102 @@
+# macOS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+_Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.xcworkspacedata
+xcuserdata/
+
+# Xcode project files
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/xcshareddata/*
+!*.xcodeproj/xcshareddata/xcschemes/*
+*.xcworkspace/contents.xcworkspacedata
+*.xcworkspace/xcuserdata/
+!*.xcworkspace/xcshareddata/
+!*.xcworkspace/xcshareddata/*
+!*.xcworkspace/xcshareddata/xcschemes/*
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Google ML Kit
+GoogleService-Info.plist
+mlkit-temp/
+mlkit-cache/
+*.tflite
+
+# User-Generated Files
+*.moved-aside
+*.swp
+*.swo
+
+# Logs
+*.log
+*.out
+
+# Temporary Files
+*.tmp
+*.temp
+
+# Git Files
+*.orig
+*.rej
+
+# Vim swap files
+*.swp
+
+# Build artifacts
+*.ipa
+*.app
+*.dSYM
+*.xcarchive
+
+# Metadata files
+*.plist
+*.map
+*.symbols
+*.bcsymbolmap
