@@ -1,0 +1,17 @@
+/* 
+  Localizable.strings
+  SuperVisionSearch
+
+  Created by Luo Lab on 1/23/25.
+  Copyright © 2025 Google Inc. All rights reserved.
+*/
+"enter_or_say_text" = "Enter or say text";
+"microphone_button" = "Microphone";
+"torch_button" = "Torch";
+"settings_button" = "Settings";
+"please_enter_query" = "Please enter Query";
+"listening" = "Listening...";
+"searching_for" = "Searching for %@";
+"speech_recognition_unavailable_title" = "Speech Recognition Unavailable";
+"speech_recognition_unavailable_message" = "Please enable speech recognition in settings.";
+"ok_button" = "OK";
