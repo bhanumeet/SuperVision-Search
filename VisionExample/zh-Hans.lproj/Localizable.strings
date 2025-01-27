@@ -1,0 +1,89 @@
+/*
+  Localizable.strings
+  VisionExample
+
+  Created by Luo Lab on 1/27/25.
+  © 2025 Google Inc. All rights reserved.
+*/
+
+/* Existing Keys */
+"search" = "输入或说出文本";
+"microphone_button" = "麦克风";
+"torch_button" = "手电筒";
+"settings_button" = "设置";
+"please_enter_query" = "请输入查询";
+"listening" = "聆听中...";
+"searching_for" = "搜索 %@";
+"speech_recognition_unavailable_title" = "语音识别不可用";
+"speech_recognition_unavailable_message" = "请在设置中启用语音识别。";
+"ok_button" = "确定";
+
+/* SnapshotViewController Additional Keys */
+
+/* Search Placeholder */
+"search_placeholder" = "输入或说出文本";
+
+/* Accessibility Labels for Buttons */
+"next_button_accessibility" = "下一个";
+"previous_button_accessibility" = "上一个";
+"back_button_accessibility" = "返回";
+"zoom_in_button_accessibility" = "放大";
+"mic_button_accessibility" = "麦克风";
+
+/* Speech Synthesizer Announcements */
+"found_single_instance" = "找到一个 %@ 的实例";
+"found_multiple_instances" = "找到 %d 个 %@ 的实例";
+"no_instances_found" = "未找到任何 %@ 的实例。";
+"searching_for_speech" = "搜索 %@";
+
+/* Error Messages */
+"error_text_recognition" = "文本识别错误。";
+"error_text_recognition_after_rotation" = "旋转后文本识别错误。";
+"error_rotating_image" = "旋转图像时出错。";
+"recognition_request_error" = "无法创建识别请求。";
+"audio_session_error" = "音频会话错误：%@";
+"recognition_error" = "识别错误：%@";
+"audio_engine_start_error" = "由于错误，audioEngine 无法启动：%@";
+"audio_session_reset_error" = "重置音频会话错误：%@";
+
+/* Audio Initialization Errors */
+"error_initializing_ding_audio" = "初始化 ding 音频时出错：%@";
+"ding_audio_not_found" = "未在包中找到 ding.mp3。";
+"error_initializing_dong_audio" = "初始化 dong 音频时出错：%@";
+"dong_audio_not_found" = "未在包中找到 dong.mp3。";
+
+/* No Text Found in Image */
+"no_text_found" = "未在图像中找到 %@ 的文本。";
+
+/* InfoViewController Additional Keys */
+
+/* Cancel Button */
+"cancel_button" = "取消";
+
+/* Accessibility Label for Cancel Button */
+"cancel_button_accessibility" = "取消";
+
+/* Info Rows */
+"camera_title" = "相机";
+"camera_description" = "按下拍摄单张照片";
+
+"scan_title" = "扫描";
+"scan_description" = "按住扫描";
+
+"zoom_title" = "放大";
+"zoom_description" = "放大滑块";
+
+"return_title" = "返回";
+"return_description" = "重新启动";
+
+"next_title" = "下一个";
+"next_description" = "前往下一个单词";
+
+"previous_title" = "上一个";
+"previous_description" = "前往上一个单词";
+
+"torch_title" = "手电筒";
+"torch_description" = "开启手电筒";
+
+"speak_title" = "说话";
+"speak_description" = "点击说话";
