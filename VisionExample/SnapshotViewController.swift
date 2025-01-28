@@ -405,7 +405,7 @@ class SnapshotViewController: UIViewController {
                 self.processRecognitionOnRotatedImage(rotated)
             } else {
                 print("No text found in image.")
-                self.speak(NSLocalizedString("error_text_recognition", comment: "Error in text recognition."))
+                self.speak(NSLocalizedString("no_text_found", comment: "No text found in image."))
                 // Restore original image if no text is found
                 DispatchQueue.main.async {
                     self.imageView.image = self.originalImage
@@ -602,8 +602,16 @@ class SnapshotViewController: UIViewController {
             if !self.frames.isEmpty {
                 self.currentIndex = 0
                 let count = self.frames.count
-                let message = count == 1 ? String(format: NSLocalizedString("found_single_instance", comment: "Announce single instance found"), self.searchTerm) :
-                                         String(format: NSLocalizedString("found_multiple_instances", comment: "Announce multiple instances found"), count, self.searchTerm)
+                let message: String
+                if count == 1 {
+                    // Ensure the localized string includes a %@ placeholder
+                    // Example: "Found one instance of %@"
+                    message = String(format: NSLocalizedString("found_single_instance", comment: "Announce single instance found"), self.searchTerm)
+                } else {
+                    // Ensure the localized string includes %d and %@ placeholders
+                    // Example: "Found %d instances of %@"
+                    message = String(format: NSLocalizedString("found_multiple_instances", comment: "Announce multiple instances found"), count, self.searchTerm)
+                }
                 self.foundSoundPlayer?.play()
                 self.speak(message)
             } else {
@@ -648,7 +656,7 @@ class SnapshotViewController: UIViewController {
     /// Adjust `fuzzyThreshold` as needed.
     /// The smaller the threshold, the stricter the match.
     private func isFuzzyMatch(for text: String, searchTerm: String) -> Bool {
-        let fuzzyThreshold = 0.2  // e.g., <=20% of min(text.count, searchTerm.count) can differ
+        let fuzzyThreshold = 2.0  // e.g., <=20% of min(text.count, searchTerm.count) can differ
         
         let distance = levenshteinDistance(text.lowercased(), searchTerm.lowercased())
         // Compare ratio of distance to the min length
@@ -800,8 +808,9 @@ class SnapshotViewController: UIViewController {
     
     private func speak(_ text: String) {
         let utterance = AVSpeechUtterance(string: text)
-        let languageCode = Locale.current.identifier
-        utterance.voice = AVSpeechSynthesisVoice(language: languageCode) ?? AVSpeechSynthesisVoice(language: "en-US")
+        let languageCode = Locale.current.languageCode ?? "en"
+        let localeIdentifier = Locale(identifier: languageCode).identifier
+        utterance.voice = AVSpeechSynthesisVoice(language: localeIdentifier) ?? AVSpeechSynthesisVoice(language: "en-US")
         speechSynthesizer.speak(utterance)
     }
     
