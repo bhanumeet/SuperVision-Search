@@ -4,6 +4,14 @@ import Speech
 import MLKitTextRecognition
 import MLKitVision
 
+// Extension to normalize strings by replacing curly apostrophes with straight ones
+extension String {
+    func normalized() -> String {
+        return self.replacingOccurrences(of: "’", with: "'")
+                   .replacingOccurrences(of: "‘", with: "'")
+    }
+}
+
 class ViewController: UIViewController {
     
     // MARK: - UI Elements
@@ -62,8 +70,8 @@ class ViewController: UIViewController {
         tf.placeholder = NSLocalizedString("search", comment: "Placeholder for text entry")
         tf.borderStyle = .roundedRect
         tf.returnKeyType = .done
-        tf.backgroundColor = .white // Explicitly set the background color
-        tf.textColor = .black       // Explicitly set the text color
+        tf.backgroundColor = .white
+        tf.textColor = .black
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
@@ -73,7 +81,6 @@ class ViewController: UIViewController {
         btn.setImage(UIImage(named: "microphone"), for: .normal)
         btn.contentMode = .scaleAspectFit
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.accessibilityLabel = NSLocalizedString("microphone_button", comment: "Accessibility label for microphone button")
         return btn
     }()
     
@@ -119,7 +126,6 @@ class ViewController: UIViewController {
         btn.setImage(UIImage(named: "torch"), for: .normal)
         btn.contentMode = .scaleAspectFit
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.accessibilityLabel = NSLocalizedString("torch_button", comment: "Accessibility label for torch button")
         return btn
     }()
     
@@ -128,7 +134,6 @@ class ViewController: UIViewController {
         btn.setImage(UIImage(named: "setting"), for: .normal)
         btn.contentMode = .scaleAspectFit
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.accessibilityLabel = NSLocalizedString("settings_button", comment: "Accessibility label for settings button")
         return btn
     }()
     
@@ -190,44 +195,63 @@ class ViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
+    // MARK: - Layout Adjustments for Landscape Mode
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Ensure the preview layer fills the entire view (for both portrait and landscape)
+        previewLayer.frame = view.bounds
+    }
+    
     // MARK: - Audio Players Setup
     private func setupAudioPlayers() {
         
         if let dingURL = Bundle.main.url(forResource: "ding", withExtension: "mp3") {
-                do {
-                    dingPlayer = try AVAudioPlayer(contentsOf: dingURL)
-                    dingPlayer?.prepareToPlay()
-                } catch {
-                    print("Error initializing ding audio: \(error)")
-                }
+            do {
+                dingPlayer = try AVAudioPlayer(contentsOf: dingURL)
+                dingPlayer?.prepareToPlay()
+                dingPlayer?.volume = 1.0
+            } catch {
+                print("Error initializing ding audio: \(error)")
             }
-            
-            if let dongURL = Bundle.main.url(forResource: "dong", withExtension: "mp3") {
-                do {
-                    dongPlayer = try AVAudioPlayer(contentsOf: dongURL)
-                    dongPlayer?.prepareToPlay()
-                } catch {
-                    print("Error initializing dong audio: \(error)")
-                }
+        } else {
+            print("ding.mp3 not found in bundle.")
+        }
+        
+        if let dongURL = Bundle.main.url(forResource: "dong", withExtension: "mp3") {
+            do {
+                dongPlayer = try AVAudioPlayer(contentsOf: dongURL)
+                dongPlayer?.prepareToPlay()
+                dongPlayer?.volume = 1.0
+            } catch {
+                print("Error initializing dong audio: \(error)")
             }
+        } else {
+            print("dong.mp3 not found in bundle.")
+        }
         
         if let sonarURL = Bundle.main.url(forResource: "sonar", withExtension: "mp3") {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: sonarURL)
                 audioPlayer?.numberOfLoops = -1
                 audioPlayer?.prepareToPlay()
+                audioPlayer?.volume = 1.0
             } catch {
                 print("Error initializing sonar audio: \(error)")
             }
+        } else {
+            print("sonar.mp3 not found in bundle.")
         }
         
         if let beepURL = Bundle.main.url(forResource: "beep", withExtension: "mp3") {
             do {
                 beepPlayer = try AVAudioPlayer(contentsOf: beepURL)
                 beepPlayer?.prepareToPlay()
+                beepPlayer?.volume = 1.0
             } catch {
                 print("Error initializing beep audio: \(error)")
             }
+        } else {
+            print("beep.mp3 not found in bundle.")
         }
     }
     
@@ -405,18 +429,14 @@ class ViewController: UIViewController {
     // MARK: - Revised Scan Button Actions
     
     @objc private func scanTouchDown() {
-        // Validate input text
         guard let inputText = textField.text, !inputText.trimmingCharacters(in: .whitespaces).isEmpty else {
             let utterance = AVSpeechUtterance(string: NSLocalizedString("please_enter_query", comment: "Prompt to enter a query"))
-            if let voice = AVSpeechSynthesisVoice(language: currentLanguageCode()) {
-                utterance.voice = voice
-            }
             speechSynthesizer.speak(utterance)
             showToast(message: NSLocalizedString("please_enter_query", comment: "Prompt to enter a query"))
             return
         }
         
-        searchText = inputText
+        searchText = inputText.normalized()
         isSearching = true
         hasSpoken = false
         overlayView.isHidden = true
@@ -429,27 +449,20 @@ class ViewController: UIViewController {
     }
     
     @objc private func scanTouchUp() {
-        // Stop sonar sound and scanning
         audioPlayer?.stop()
-        isSearching = false  // Stop scanning to prevent further beeps
-        
-        // Take snapshot on release
+        isSearching = false
         cameraButtonTapped()
     }
     
     @objc private func cameraButtonTapped() {
-        // Validate input text before capturing photo
         guard let currentText = textField.text, !currentText.trimmingCharacters(in: .whitespaces).isEmpty else {
             let utterance = AVSpeechUtterance(string: NSLocalizedString("please_enter_query", comment: "Prompt to enter a query"))
-            if let voice = AVSpeechSynthesisVoice(language: currentLanguageCode()) {
-                utterance.voice = voice
-            }
             speechSynthesizer.speak(utterance)
             showToast(message: NSLocalizedString("please_enter_query", comment: "Prompt to enter a query"))
             return
         }
         
-        searchText = currentText
+        searchText = currentText.normalized()
         hasSpoken = false
         
         let settings = AVCapturePhotoSettings()
@@ -514,7 +527,6 @@ class ViewController: UIViewController {
     // MARK: - Helper Function for Current Language Code
     private func currentLanguageCode() -> String {
         let locale = Locale.current
-        // Prefer language code and region code if available
         if let languageCode = locale.languageCode, let regionCode = locale.regionCode {
             return "\(languageCode)-\(regionCode)"
         }
@@ -564,17 +576,21 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             
             for block in result.blocks {
                 for line in block.lines {
-                    // Check if the entire line contains the searchText
-                    if line.text.range(of: self.searchText, options: .caseInsensitive) != nil {
+                    let normalizedLineText = line.text.normalized()
+                    let normalizedSearchText = self.searchText.normalized()
+                    
+                    if normalizedLineText.range(of: normalizedSearchText, options: .caseInsensitive) != nil {
                         DispatchQueue.main.async {
                             self.highlightLiveBox(line.frame)
                             
-                            // Play beep like a metal detector with debounce
                             if self.beepDebounceTimer == nil {
+                                print("Beep triggered for searchText: \(self.searchText)")
                                 self.beepPlayer?.play()
                                 self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
                                     self.beepDebounceTimer = nil
                                 }
+                            } else {
+                                print("Beep debounce active. Skipping beep.")
                             }
                         }
                     }
@@ -629,7 +645,7 @@ extension ViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ tf: UITextField) -> Bool {
         tf.resignFirstResponder()
         
-        if let query = tf.text, !query.trimmingCharacters(in: .whitespaces).isEmpty {
+        if let query = tf.text?.normalized(), !query.trimmingCharacters(in: .whitespaces).isEmpty {
             let announcementFormat = NSLocalizedString("searching_for", comment: "Announce search term")
             let announcement = String(format: announcementFormat, query)
             let utterance = AVSpeechUtterance(string: announcement)
@@ -666,10 +682,10 @@ extension ViewController {
                 }
             case .denied, .restricted, .notDetermined:
                 DispatchQueue.main.async {
-                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: "Title for speech recognition alert"),
-                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: "Message for speech recognition alert"),
+                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: ""),
+                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: ""),
                                                   preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: "OK button title"), style: .default, handler: nil))
+                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: ""), style: .default, handler: nil))
                     self.present(alert, animated: true, completion: nil)
                 }
             @unknown default:
@@ -702,12 +718,12 @@ extension ViewController {
             if let r = result {
                 let bestString = r.bestTranscription.formattedString
                 print("Recognized: \(bestString)")
-                DispatchQueue.main.async { self.textField.text = bestString }
+                DispatchQueue.main.async { self.textField.text = bestString.normalized() }
                 
                 if r.isFinal {
                     DispatchQueue.main.async {
                         let announcementFormat = NSLocalizedString("searching_for", comment: "Announce search term")
-                        let announcement = String(format: announcementFormat, bestString)
+                        let announcement = String(format: announcementFormat, bestString.normalized())
                         let utterance = AVSpeechUtterance(string: announcement)
                         if let voice = AVSpeechSynthesisVoice(language: self.currentLanguageCode()) {
                             utterance.voice = voice
@@ -735,14 +751,11 @@ extension ViewController {
             micButton.setImage(UIImage(named: "microphone_active"), for: .normal)
             micButton.backgroundColor = UIColor.red.withAlphaComponent(0.5)
             print("Started recording speech...")
-            
-            // Play "ding" sound to indicate mic activation
             dingPlayer?.play()
         } catch {
             print("audioEngine start error: \(error)")
         }
     }
-
     
     private func stopSpeechRecording() {
         audioEngine.stop()
@@ -751,7 +764,6 @@ extension ViewController {
         recognitionRequest = nil
         recognitionTask = nil
         
-        // Play "dong" sound to indicate mic deactivation
         dongPlayer?.play()
         
         DispatchQueue.main.async {
@@ -768,13 +780,12 @@ extension ViewController {
         }
     }
 
-    
     private func presentTemporaryAlert() {
         let listeningMessage = NSLocalizedString("listening", comment: "Listening indicator")
         let alert = UIAlertController(title: nil, message: listeningMessage, preferredStyle: .alert)
         self.present(alert, animated: true, completion: nil)
         
-        let listeningDuration: TimeInterval = 5.0
+        let listeningDuration: TimeInterval = 2.0
         
         DispatchQueue.main.asyncAfter(deadline: .now() + listeningDuration) {
             self.stopSpeechRecording()

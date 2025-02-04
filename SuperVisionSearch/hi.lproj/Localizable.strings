@@ -1,0 +1,86 @@
+/*
+  Localizable.strings
+  VisionExample
+
+  Created by Luo Lab on 1/27/25.
+  Copyright © 2025 Google Inc. All rights reserved.
+*/
+
+/* Existing Keys */
+"search" = "पाठ दर्ज करें या बोलें";
+"microphone_button" = "माइक्रोफोन";
+"torch_button" = "टॉर्च";
+"settings_button" = "सेटिंग्स";
+"please_enter_query" = "कृपया एक प्रश्न दर्ज करें";
+"listening" = "सुन रहा हूँ...";
+"searching_for" = "%@ के लिए खोज रहा हूँ:";
+"speech_recognition_unavailable_title" = "वाक् पहचान अनुपलब्ध है";
+"speech_recognition_unavailable_message" = "कृपया सेटिंग्स में वाक् पहचान सक्षम करें।";
+"ok_button" = "OK";
+
+/* SnapshotViewController Additional Keys */
+
+/* Search Placeholder */
+"search_placeholder" = "पाठ दर्ज करें या बोलें";
+
+/* Accessibility Labels for Buttons */
+"next_button_accessibility" = "अगला";
+"previous_button_accessibility" = "पिछला";
+"back_button_accessibility" = "वापस";
+"zoom_in_button_accessibility" = "जूम इन करें";
+"mic_button_accessibility" = "माइक्रोफोन";
+
+/* Speech Synthesizer Announcements */
+"found_single_instance" = "एक %@ पाया गया";
+"found_multiple_instances" = "%d %@ पाए गए";
+"no_instances_found" = "कोई %@ पाया नहीं गया।";
+"searching_for_speech" = "के लिए खोज रहा हूँ: %@";
+
+/* Error Messages */
+"error_text_recognition" = "पाठ पहचान में त्रुटि।";
+"error_text_recognition_after_rotation" = "घूर्णन के बाद पाठ पहचान में त्रुटि।";
+"error_rotating_image" = "छवि घूर्णन में त्रुटि।";
+"recognition_request_error" = "पहचान अनुरोध बनाने में असमर्थ।";
+"audio_session_error" = "ऑडियो सत्र त्रुटि: %@";
+"recognition_error" = "पहचान त्रुटि: %@";
+"audio_engine_start_error" = "audioEngine एक त्रुटि के कारण शुरू नहीं हो सका: %@";
+"audio_session_reset_error" = "ऑडियो सत्र रीसेट त्रुटि: %@";
+
+/* Audio Initialization Errors */
+"error_initializing_ding_audio" = "ding ऑडियो प्रारंभ करने में त्रुटि: %@";
+"ding_audio_not_found" = "bundle में ding.mp3 नहीं मिला।";
+"error_initializing_dong_audio" = "dong ऑडियो प्रारंभ करने में त्रुटि: %@";
+"dong_audio_not_found" = "bundle में dong.mp3 नहीं मिला।";
+
+/* No Text Found in Image */
+"no_text_found" = "छवि में %@ के लिए कोई पाठ नहीं पाया गया।";
+
+/* InfoViewController Additional Keys */
+
+/* Cancel Button */
+"cancel_button" = "रद्द करें";
+
+/* Info Rows */
+"camera_title" = "कैमरा";
+"camera_description" = "एकल फोटो लेने के लिए टैप करें";
+
+"scan_title" = "स्कैन करें";
+"scan_description" = "स्कैन करने के लिए दबाए रखें";
+
+"zoom_title" = "जूम इन करें";
+"zoom_description" = "जूम इन करने के लिए स्लाइडर";
+
+"return_title" = "वापस";
+"return_description" = "पुनः प्रारंभ करें";
+
+"next_title" = "अगला";
+"next_description" = "अगला शब्द पर जाएँ";
+
+"previous_title" = "पिछला";
+"previous_description" = "पिछला शब्द पर जाएँ";
+
+"torch_title" = "टॉर्च";
+"torch_description" = "टॉर्च चालू करें";
+
+"speak_title" = "बोलें";
+"speak_description" = "बोलने के लिए टैप करें";

@@ -1,0 +1,86 @@
+/*
+  Localizable.strings
+  VisionExample
+
+  Created by Luo Lab on 1/27/25.
+  Copyright © 2025 Google Inc. All rights reserved.
+*/
+
+/* Existing Keys */
+"search" = "Inserisci o pronuncia del testo";
+"microphone_button" = "Microfono";
+"torch_button" = "Torcia";
+"settings_button" = "Impostazioni";
+"please_enter_query" = "Si prega di inserire una query";
+"listening" = "In ascolto...";
+"searching_for" = "Ricerca di %@";
+"speech_recognition_unavailable_title" = "Riconoscimento vocale non disponibile";
+"speech_recognition_unavailable_message" = "Si prega di abilitare il riconoscimento vocale nelle impostazioni.";
+"ok_button" = "OK";
+
+/* SnapshotViewController Additional Keys */
+
+/* Search Placeholder */
+"search_placeholder" = "Inserisci o pronuncia del testo";
+
+/* Accessibility Labels for Buttons */
+"next_button_accessibility" = "Successivo";
+"previous_button_accessibility" = "Precedente";
+"back_button_accessibility" = "Indietro";
+"zoom_in_button_accessibility" = "Ingrandisci";
+"mic_button_accessibility" = "Microfono";
+
+/* Speech Synthesizer Announcements */
+"found_single_instance" = "Una istanza di %@ trovata";
+"found_multiple_instances" = "%d istanze di %@ trovate";
+"no_instances_found" = "Nessuna istanza di %@ trovata.";
+"searching_for_speech" = "Ricerca di %@";
+
+/* Error Messages */
+"error_text_recognition" = "Errore nella riconoscimento del testo.";
+"error_text_recognition_after_rotation" = "Errore nella riconoscimento del testo dopo la rotazione.";
+"error_rotating_image" = "Errore durante la rotazione dell'immagine.";
+"recognition_request_error" = "Impossibile creare la richiesta di riconoscimento.";
+"audio_session_error" = "Errore della sessione audio: %@";
+"recognition_error" = "Errore di riconoscimento: %@";
+"audio_engine_start_error" = "audioEngine non è riuscito ad avviarsi a causa di un errore: %@";
+"audio_session_reset_error" = "Errore di reset della sessione audio: %@";
+
+/* Audio Initialization Errors */
+"error_initializing_ding_audio" = "Errore durante l'inizializzazione dell'audio ding: %@";
+"ding_audio_not_found" = "ding.mp3 non trovato nel bundle.";
+"error_initializing_dong_audio" = "Errore durante l'inizializzazione dell'audio dong: %@";
+"dong_audio_not_found" = "dong.mp3 non trovato nel bundle.";
+
+/* No Text Found in Image */
+"no_text_found" = "Nessun testo trovato nell'immagine per %@.";
+
+/* InfoViewController Additional Keys */
+
+/* Cancel Button */
+"cancel_button" = "Annulla";
+
+/* Info Rows */
+"camera_title" = "Fotocamera";
+"camera_description" = "Tocca per scattare una singola foto";
+
+"scan_title" = "Scannerizza";
+"scan_description" = "Tieni premuto per scannerizzare";
+
+"zoom_title" = "Ingrandisci";
+"zoom_description" = "Slider per ingrandire";
+
+"return_title" = "Ritorna";
+"return_description" = "Riavvia";
+
+"next_title" = "Next";
+"next_description" = "Vai alla parola successiva";
+
+"previous_title" = "Precedente";
+"previous_description" = "Vai alla parola precedente";
+
+"torch_title" = "Torcia";
+"torch_description" = "Accendi la torcia";
+
+"speak_title" = "Parla";
+"speak_description" = "Tocca per parlare";

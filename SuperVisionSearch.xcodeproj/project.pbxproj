@@ -18,10 +18,10 @@
 		2014D79A2D47FF3000B597E3 /* beep.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2014D7922D47FF3000B597E3 /* beep.mp3 */; };
 		2014D79B2D47FF3000B597E3 /* dong.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2014D7942D47FF3000B597E3 /* dong.mp3 */; };
 		2014D7A12D48067200B597E3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2014D79F2D48067200B597E3 /* Localizable.strings */; };
+		2075F5EF2D4AA7FE00E22111 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2075F5EE2D4AA7FE00E22111 /* LaunchScreen.storyboard */; };
 		359E99FFFF4D3E21F520B525 /* Pods_VisionExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C147D1E3C3B4F49590F9848 /* Pods_VisionExample.framework */; };
 		4ADD356323BAC29A001277A7 /* MLKitExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10224B5B2087E49F00A77316 /* MLKitExtensions.swift */; };
 		BB287B3920729CE90069707A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB287B3820729CE90069707A /* AppDelegate.swift */; };
-		BB287B3E20729CE90069707A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BB287B3C20729CE90069707A /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,11 +46,16 @@
 		2014D7A62D480C0400B597E3 /* es-US */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-US"; path = "es-US.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		2014D7A72D480C1200B597E3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		2014D7A82D480C1200B597E3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		2014D7A92D48359300B597E3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Main.strings; sourceTree = "<group>"; };
+		2014D7AA2D48359300B597E3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2014D7AB2D48359A00B597E3 /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/Main.strings; sourceTree = "<group>"; };
+		2014D7AC2D48359A00B597E3 /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/Localizable.strings; sourceTree = "<group>"; };
+		2075F5EE2D4AA7FE00E22111 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		77A7118C04DC144712829404 /* Pods-VisionExampleObjC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VisionExampleObjC.release.xcconfig"; path = "Target Support Files/Pods-VisionExampleObjC/Pods-VisionExampleObjC.release.xcconfig"; sourceTree = "<group>"; };
 		8C147D1E3C3B4F49590F9848 /* Pods_VisionExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_VisionExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6353A7C11A8773501FEA793 /* Pods-VisionExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VisionExample.debug.xcconfig"; path = "Target Support Files/Pods-VisionExample/Pods-VisionExample.debug.xcconfig"; sourceTree = "<group>"; };
 		A63EE51F1802FA5412BDDC3D /* Pods-VisionExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VisionExample.release.xcconfig"; path = "Target Support Files/Pods-VisionExample/Pods-VisionExample.release.xcconfig"; sourceTree = "<group>"; };
-		BB287B3520729CE90069707A /* VisionExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisionExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB287B3520729CE90069707A /* SuperVisionSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SuperVisionSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB287B3820729CE90069707A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BB287B3D20729CE90069707A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BB287B4420729CE90069707A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -93,7 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				2014D7902D47FDF300B597E3 /* Assets 2.xcassets */,
-				BB287B3720729CE90069707A /* VisionExample */,
+				BB287B3720729CE90069707A /* SuperVisionSearch */,
 				BB287B3620729CE90069707A /* Products */,
 				4B54E348EF460B92E9FFBF3E /* Pods */,
 				565A4D531C23A4C92CFB4FAE /* Frameworks */,
@@ -103,12 +108,12 @@
 		BB287B3620729CE90069707A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BB287B3520729CE90069707A /* VisionExample.app */,
+				BB287B3520729CE90069707A /* SuperVisionSearch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		BB287B3720729CE90069707A /* VisionExample */ = {
+		BB287B3720729CE90069707A /* SuperVisionSearch */ = {
 			isa = PBXGroup;
 			children = (
 				2014D7922D47FF3000B597E3 /* beep.mp3 */,
@@ -124,9 +129,10 @@
 				1001E6F620CEE0DD00445CB3 /* UIUtilities.swift */,
 				BB287B4A2072A0200069707A /* Supporting Files */,
 				BB287B4420729CE90069707A /* Info.plist */,
+				2075F5EE2D4AA7FE00E22111 /* LaunchScreen.storyboard */,
 				2014D79F2D48067200B597E3 /* Localizable.strings */,
 			);
-			path = VisionExample;
+			path = SuperVisionSearch;
 			sourceTree = "<group>";
 		};
 		BB287B4A2072A0200069707A /* Supporting Files */ = {
@@ -140,9 +146,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BB287B3420729CE90069707A /* VisionExample */ = {
+		BB287B3420729CE90069707A /* SuperVisionSearch */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BB287B4720729CE90069707A /* Build configuration list for PBXNativeTarget "VisionExample" */;
+			buildConfigurationList = BB287B4720729CE90069707A /* Build configuration list for PBXNativeTarget "SuperVisionSearch" */;
 			buildPhases = (
 				CBD42F3FEA52185AAAB0E61E /* [CP] Check Pods Manifest.lock */,
 				BB287B3120729CE90069707A /* Sources */,
@@ -155,9 +161,9 @@
 			);
 			dependencies = (
 			);
-			name = VisionExample;
+			name = SuperVisionSearch;
 			productName = "ml-kit-sampler";
-			productReference = BB287B3520729CE90069707A /* VisionExample.app */;
+			productReference = BB287B3520729CE90069707A /* SuperVisionSearch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -177,7 +183,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BB287B3020729CE90069707A /* Build configuration list for PBXProject "VisionExample" */;
+			buildConfigurationList = BB287B3020729CE90069707A /* Build configuration list for PBXProject "SuperVisionSearch" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -188,13 +194,15 @@
 				de,
 				"es-US",
 				"zh-Hans",
+				it,
+				hi,
 			);
 			mainGroup = BB287B2C20729CE90069707A;
 			productRefGroup = BB287B3620729CE90069707A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BB287B3420729CE90069707A /* VisionExample */,
+				BB287B3420729CE90069707A /* SuperVisionSearch */,
 			);
 		};
 /* End PBXProject section */
@@ -204,9 +212,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB287B3E20729CE90069707A /* Main.storyboard in Resources */,
 				2014D7972D47FF3000B597E3 /* sonar.mp3 in Resources */,
 				2014D7982D47FF3000B597E3 /* found.mp3 in Resources */,
+				2075F5EF2D4AA7FE00E22111 /* LaunchScreen.storyboard in Resources */,
 				2014D7992D47FF3000B597E3 /* ding.mp3 in Resources */,
 				2014D79A2D47FF3000B597E3 /* beep.mp3 in Resources */,
 				2014D7A12D48067200B597E3 /* Localizable.strings in Resources */,
@@ -321,6 +329,8 @@
 				2014D7A42D480BF200B597E3 /* de */,
 				2014D7A62D480C0400B597E3 /* es-US */,
 				2014D7A82D480C1200B597E3 /* zh-Hans */,
+				2014D7AA2D48359300B597E3 /* it */,
+				2014D7AC2D48359A00B597E3 /* hi */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -333,6 +343,8 @@
 				2014D7A32D480BF200B597E3 /* de */,
 				2014D7A52D480C0400B597E3 /* es-US */,
 				2014D7A72D480C1200B597E3 /* zh-Hans */,
+				2014D7A92D48359300B597E3 /* it */,
+				2014D7AB2D48359A00B597E3 /* hi */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -459,13 +471,19 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A6353A7C11A8773501FEA793 /* Pods-VisionExample.debug.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = S3XP72WELV;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = "$(SRCROOT)/VisionExample/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/SuperVisionSearch/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = SuperVisionSearch;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.google.mlkit.quickstart.VisionExample;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.masseyeandear.supervisionsearch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -479,13 +497,19 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A63EE51F1802FA5412BDDC3D /* Pods-VisionExample.release.xcconfig */;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = S3XP72WELV;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = "$(SRCROOT)/VisionExample/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/SuperVisionSearch/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = SuperVisionSearch;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.google.mlkit.quickstart.VisionExample;
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.masseyeandear.supervisionsearch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -498,7 +522,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BB287B3020729CE90069707A /* Build configuration list for PBXProject "VisionExample" */ = {
+		BB287B3020729CE90069707A /* Build configuration list for PBXProject "SuperVisionSearch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BB287B4520729CE90069707A /* Debug */,
@@ -507,7 +531,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BB287B4720729CE90069707A /* Build configuration list for PBXNativeTarget "VisionExample" */ = {
+		BB287B4720729CE90069707A /* Build configuration list for PBXNativeTarget "SuperVisionSearch" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BB287B4820729CE90069707A /* Debug */,

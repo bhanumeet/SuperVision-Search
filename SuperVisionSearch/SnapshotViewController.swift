@@ -19,7 +19,7 @@ class SnapshotViewController: UIViewController {
     private var textRecognizer: TextRecognizer!
     private let speechSynthesizer = AVSpeechSynthesizer()
     
-    private var foundSoundPlayer: AVAudioPlayer?  // Property for the "found" sound
+    private var foundSoundPlayer: AVAudioPlayer?  // "found" sound
     
     private let scrollView = UIScrollView()
     private let imageView = UIImageView()
@@ -76,7 +76,6 @@ class SnapshotViewController: UIViewController {
         btn.setImage(UIImage(named: "microphone"), for: .normal)
         btn.contentMode = .scaleAspectFit
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.accessibilityLabel = NSLocalizedString("microphone_button", comment: "Accessibility label for microphone button")
         return btn
     }()
     
@@ -123,11 +122,11 @@ class SnapshotViewController: UIViewController {
         view.backgroundColor = .black
         
         setupScrollView()
-        setupSearchBar()    // **Ensure search bar is set up before buttons**
+        setupSearchBar()    // Ensure search bar is set up before buttons
         setupButtons()
         setupAudioPlayers()
         
-        // Load "found" sound resource (optional)
+        // Load "found" sound resource
         if let foundURL = Bundle.main.url(forResource: "found", withExtension: "mp3") {
             do {
                 foundSoundPlayer = try AVAudioPlayer(contentsOf: foundURL)
@@ -166,9 +165,25 @@ class SnapshotViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // Automatically start speech recognition
-        // Commented out to prevent automatic mic activation on view load
+        // Uncomment the next line if you want to start speech recording automatically.
         // startSpeechRecording()
+    }
+    
+    // MARK: - Layout Updates for Landscape Compatibility
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // Update scrollView and imageView frames to always fill the view
+        scrollView.frame = view.bounds
+        imageView.frame = scrollView.bounds
+        
+        // If an image is already set, adjust zoom scales (optional)
+        if let image = imageView.image {
+            let scaleWidth = scrollView.bounds.width / image.size.width
+            let scaleHeight = scrollView.bounds.height / image.size.height
+            scrollView.minimumZoomScale = min(scaleWidth, scaleHeight)
+            scrollView.zoomScale = scrollView.minimumZoomScale
+        }
     }
     
     
@@ -250,7 +265,7 @@ class SnapshotViewController: UIViewController {
             // Search Container View Constraints
             searchContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             searchContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            searchContainerBottomConstraint!, // Use the stored constraint
+            searchContainerBottomConstraint!,
             searchContainerView.heightAnchor.constraint(equalToConstant: 44),
             
             // Search TextField Constraints
@@ -279,7 +294,7 @@ class SnapshotViewController: UIViewController {
                 print("Error initializing ding audio: \(error)")
             }
         } else {
-            print("ding.mp3 not found in bundle.")
+            print(NSLocalizedString("ding_audio_not_found", comment: ""))
         }
         
         // Initialize "dong" player
@@ -292,7 +307,7 @@ class SnapshotViewController: UIViewController {
                 print("Error initializing dong audio: \(error)")
             }
         } else {
-            print("dong.mp3 not found in bundle.")
+            print(NSLocalizedString("dong_audio_not_found", comment: ""))
         }
     }
     
@@ -350,8 +365,7 @@ class SnapshotViewController: UIViewController {
         return ratio < 0.3
     }
 
-
-    /// 1) First pass: scan original image, detect angle based on all text elements, rotate the image accordingly.
+    /// First pass: scan the original image, detect text angles, and rotate the image.
     private func processInitialAngleDetection() {
         let visionImage = VisionImage(image: originalImage)
         visionImage.orientation = originalImage.imageOrientation
@@ -360,7 +374,7 @@ class SnapshotViewController: UIViewController {
             guard let self = self else { return }
             if let error = error {
                 print("Initial OCR error: \(error)")
-                self.speak(NSLocalizedString("error_text_recognition", comment: "Error in text recognition."))
+                self.speak(NSLocalizedString("error_text_recognition", comment: ""))
                 return
             }
             guard let result = result else { return }
@@ -396,7 +410,7 @@ class SnapshotViewController: UIViewController {
 
                 self.rotatedImage = self.rotateImage(self.originalImage, by: -adjustedAngle)
                 guard let rotated = self.rotatedImage else {
-                    self.speak(NSLocalizedString("error_rotating_image", comment: "Error rotating image."))
+                    self.speak(NSLocalizedString("error_rotating_image", comment: ""))
                     return
                 }
                 DispatchQueue.main.async {
@@ -405,7 +419,7 @@ class SnapshotViewController: UIViewController {
                 self.processRecognitionOnRotatedImage(rotated)
             } else {
                 print("No text found in image.")
-                self.speak(NSLocalizedString("no_text_found", comment: "No text found in image."))
+                self.speak(String(format: NSLocalizedString("no_text_found", comment: ""), self.searchTerm))
                 // Restore original image if no text is found
                 DispatchQueue.main.async {
                     self.imageView.image = self.originalImage
@@ -415,7 +429,7 @@ class SnapshotViewController: UIViewController {
         }
     }
     
-    /// 2) Second pass: re-run OCR on the rotated image and highlight matches
+    /// Second pass: run OCR on the rotated image and highlight matches.
     private func processRecognitionOnRotatedImage(_ image: UIImage) {
         frames.removeAll()
 
@@ -426,7 +440,7 @@ class SnapshotViewController: UIViewController {
             guard let self = self else { return }
             if let error = error {
                 print("OCR on rotated image error: \(error)")
-                self.speak(NSLocalizedString("error_text_recognition_after_rotation", comment: "Error in text recognition after rotation."))
+                self.speak(NSLocalizedString("error_text_recognition_after_rotation", comment: ""))
                 return
             }
             guard let result = result else { return }
@@ -453,20 +467,15 @@ class SnapshotViewController: UIViewController {
         }
         frames.removeAll()
 
-        // If searching for multiple words, we need to find adjacent matches
+        // If searching for multiple words, find adjacent matches
         if individualSearchTerms.count > 1 {
             for block in result.blocks {
                 for line in block.lines {
-                    // Get all elements in the line
                     let elements = line.elements
-                    
-                    // Slide through elements looking for consecutive matches
                     var i = 0
                     while i < elements.count - (individualSearchTerms.count - 1) {
                         var matchFound = true
                         var matchingElements = [TextElement]()
-                        
-                        // Try to match all search terms consecutively
                         for (index, searchTerm) in individualSearchTerms.enumerated() {
                             if i + index >= elements.count ||
                                !isPotentialMatch(for: elements[i + index].text, keyword: searchTerm) {
@@ -477,7 +486,6 @@ class SnapshotViewController: UIViewController {
                         }
                         
                         if matchFound && !matchingElements.isEmpty {
-                            // Calculate combined bounding box for all matching elements
                             var allPoints: [CGPoint] = []
                             for element in matchingElements {
                                 allPoints.append(contentsOf: element.cornerPoints.map { $0.cgPointValue })
@@ -491,13 +499,9 @@ class SnapshotViewController: UIViewController {
                             let minY = ys.min() ?? 0
                             let maxY = ys.max() ?? 0
                             
-                            let frame = CGRect(x: minX,
-                                             y: minY,
-                                             width: maxX - minX,
-                                             height: maxY - minY)
+                            let frame = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
                             frames.append(frame)
                             
-                            // Draw highlight for the combined phrase
                             let scaleWidth = imageView.bounds.width / image.size.width
                             let scaleHeight = imageView.bounds.height / image.size.height
                             let scale = min(scaleWidth, scaleHeight)
@@ -508,13 +512,13 @@ class SnapshotViewController: UIViewController {
                             let imageY = (imageView.bounds.height - imageHeight) / 2.0
                             
                             let underlinePath = UIBezierPath()
-                            underlinePath.move(to: CGPoint(x: minX, y: maxY))
-                            underlinePath.addLine(to: CGPoint(x: maxX, y: maxY))
+                            underlinePath.move(to: CGPoint(x: minX, y: maxY + 5))
+                            underlinePath.addLine(to: CGPoint(x: maxX, y: maxY + 5))
                             
                             let blinkLayer = CAShapeLayer()
                             blinkLayer.path = underlinePath.cgPath
                             blinkLayer.strokeColor = UIColor.green.cgColor
-                            blinkLayer.lineWidth = 5.0
+                            blinkLayer.lineWidth = 7.0
                             blinkLayer.position = CGPoint(x: imageX, y: imageY)
                             blinkLayer.transform = CATransform3DMakeScale(scale, scale, 1)
                             imageView.layer.addSublayer(blinkLayer)
@@ -528,7 +532,7 @@ class SnapshotViewController: UIViewController {
                             blinkAnimation.repeatCount = .infinity
                             blinkLayer.add(blinkAnimation, forKey: "blink")
                             
-                            i += individualSearchTerms.count // Skip past all matched words
+                            i += individualSearchTerms.count
                         } else {
                             i += 1
                         }
@@ -536,7 +540,7 @@ class SnapshotViewController: UIViewController {
                 }
             }
         } else {
-            // Original single-word search logic
+            // Single-word search logic
             for block in result.blocks {
                 for line in block.lines {
                     for element in line.elements {
@@ -552,13 +556,9 @@ class SnapshotViewController: UIViewController {
                                 let minY = ys.min() ?? 0
                                 let maxY = ys.max() ?? 0
                                 
-                                let frame = CGRect(x: minX,
-                                                 y: minY,
-                                                 width: maxX - minX,
-                                                 height: maxY - minY)
+                                let frame = CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
                                 frames.append(frame)
                                 
-                                // Draw highlight
                                 let scaleWidth = imageView.bounds.width / image.size.width
                                 let scaleHeight = imageView.bounds.height / image.size.height
                                 let scale = min(scaleWidth, scaleHeight)
@@ -569,13 +569,13 @@ class SnapshotViewController: UIViewController {
                                 let imageY = (imageView.bounds.height - imageHeight) / 2.0
                                 
                                 let underlinePath = UIBezierPath()
-                                underlinePath.move(to: CGPoint(x: minX, y: maxY))
-                                underlinePath.addLine(to: CGPoint(x: maxX, y: maxY))
+                                underlinePath.move(to: CGPoint(x: minX, y: maxY + 5))
+                                underlinePath.addLine(to: CGPoint(x: maxX, y: maxY + 5))
                                 
                                 let blinkLayer = CAShapeLayer()
                                 blinkLayer.path = underlinePath.cgPath
                                 blinkLayer.strokeColor = UIColor.green.cgColor
-                                blinkLayer.lineWidth = 5.0
+                                blinkLayer.lineWidth = 7.0
                                 blinkLayer.position = CGPoint(x: imageX, y: imageY)
                                 blinkLayer.transform = CATransform3DMakeScale(scale, scale, 1)
                                 imageView.layer.addSublayer(blinkLayer)
@@ -604,72 +604,58 @@ class SnapshotViewController: UIViewController {
                 let count = self.frames.count
                 let message: String
                 if count == 1 {
-                    // Ensure the localized string includes a %@ placeholder
-                    // Example: "Found one instance of %@"
-                    message = String(format: NSLocalizedString("found_single_instance", comment: "Announce single instance found"), self.searchTerm)
+                    message = String(format: NSLocalizedString("found_single_instance", comment: ""), self.searchTerm)
                 } else {
-                    // Ensure the localized string includes %d and %@ placeholders
-                    // Example: "Found %d instances of %@"
-                    message = String(format: NSLocalizedString("found_multiple_instances", comment: "Announce multiple instances found"), count, self.searchTerm)
+                    message = String(format: NSLocalizedString("found_multiple_instances", comment: ""), count, self.searchTerm)
                 }
                 self.foundSoundPlayer?.play()
                 self.speak(message)
             } else {
-                print(String(format: NSLocalizedString("no_instances_found", comment: "Announce no instances found"), self.searchTerm))
-                self.speak(String(format: NSLocalizedString("no_instances_found", comment: "Announce no instances found"), self.searchTerm))
+                let noInstanceMessage = String(format: NSLocalizedString("no_instances_found", comment: ""), self.searchTerm)
+                print(noInstanceMessage)
+                self.speak(noInstanceMessage)
             }
         }
     }
-    // Helper function to directly check for substring presence
+    
+    // Helper function to check for a substring match (with fuzzy matching).
     private func containsSearchTerm(_ text: String, searchTerm: String) -> Bool {
         let text = text.lowercased().trimmingCharacters(in: .whitespaces)
         let searchTerm = searchTerm.lowercased().trimmingCharacters(in: .whitespaces)
         
-        // Direct contains check
         if text.contains(searchTerm) {
             return true
         }
-        
-        // Check with spaces around for whole word matching
         if text.contains(" \(searchTerm) ") {
             return true
         }
-        
-        // Levenshtein distance check for fuzzy matching
         return levenshtein(a: text, b: searchTerm) <= 2
     }
     
-    // Handle mic
+    // MARK: - Mic Handling
     
     @objc private func handleMicTapped() {
         if audioEngine.isRunning {
-            stopSpeechRecording() // Stop speech recognition if it's running
+            stopSpeechRecording()
         } else {
-            requestSpeechPermissionAndStartRecording() // Start speech recognition
+            requestSpeechPermissionAndStartRecording()
         }
     }
-
-
+    
+    
     // MARK: - Fuzzy Matching
     
-    /// Main fuzzy check for each line or element's text
-    /// Adjust `fuzzyThreshold` as needed.
-    /// The smaller the threshold, the stricter the match.
     private func isFuzzyMatch(for text: String, searchTerm: String) -> Bool {
-        let fuzzyThreshold = 2.0  // e.g., <=20% of min(text.count, searchTerm.count) can differ
-        
+        let fuzzyThreshold = 2.0
         let distance = levenshteinDistance(text.lowercased(), searchTerm.lowercased())
-        // Compare ratio of distance to the min length
         let ratio = Double(distance) / Double(min(text.count, searchTerm.count))
         return ratio <= fuzzyThreshold
     }
     
-    /// Standard Levenshtein distance computation
     private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
         let a = Array(s1), b = Array(s2)
         let m = a.count, n = b.count
         
-        // Create a 2D array for dynamic programming
         var dp = [[Int]](repeating: [Int](repeating: 0, count: n + 1), count: m + 1)
         
         for i in 0...m { dp[i][0] = i }
@@ -680,9 +666,7 @@ class SnapshotViewController: UIViewController {
                 if a[i - 1] == b[j - 1] {
                     dp[i][j] = dp[i - 1][j - 1]
                 } else {
-                    dp[i][j] = 1 + min(dp[i - 1][j],     // deletion
-                                       dp[i][j - 1],     // insertion
-                                       dp[i - 1][j - 1]) // substitution
+                    dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
                 }
             }
         }
@@ -712,11 +696,9 @@ class SnapshotViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale)
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
         
-        // Move origin to middle
         context.translateBy(x: newSize.width/2, y: newSize.height/2)
         context.rotate(by: radians)
         
-        // Draw the original image at the center
         image.draw(in: CGRect(
             x: -image.size.width/2,
             y: -image.size.height/2,
@@ -793,7 +775,6 @@ class SnapshotViewController: UIViewController {
     
     @objc private func zoomInTapped() {
         guard !frames.isEmpty else {
-            // If we don't have any frames, just do a general zoom-in on the current scale
             let newZoomScale = min(scrollView.zoomScale * 1.2, scrollView.maximumZoomScale)
             scrollView.setZoomScale(newZoomScale, animated: true)
             return
@@ -829,7 +810,6 @@ class SnapshotViewController: UIViewController {
         let animationCurveRaw = animationCurveRawNSN.uintValue
         let animationOptions = UIView.AnimationOptions(rawValue: animationCurveRaw << 16)
         
-        // Adjust the bottom constraint of searchContainerView
         let keyboardHeight = keyboardFrame.height
         searchContainerBottomConstraint?.constant = -keyboardHeight - 10
         
@@ -851,7 +831,6 @@ class SnapshotViewController: UIViewController {
         let animationCurveRaw = animationCurveRawNSN.uintValue
         let animationOptions = UIView.AnimationOptions(rawValue: animationCurveRaw << 16)
         
-        // Reset the bottom constraint of searchContainerView
         searchContainerBottomConstraint?.constant = -20
         
         UIView.animate(withDuration: animationDuration,
@@ -866,12 +845,10 @@ class SnapshotViewController: UIViewController {
     // MARK: - Speech Recognition
     
     private func startSpeechRecording() {
-        // Check if already running
         if audioEngine.isRunning {
             return
         }
         
-        // Request speech recognition authorization
         SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
             guard let self = self else { return }
             switch authStatus {
@@ -881,10 +858,10 @@ class SnapshotViewController: UIViewController {
                 }
             case .denied, .restricted, .notDetermined:
                 DispatchQueue.main.async {
-                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: "Title for speech recognition alert"),
-                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: "Message for speech recognition alert"),
+                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: ""),
+                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: ""),
                                                   preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: "OK button title"), style: .default, handler: nil))
+                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: ""), style: .default, handler: nil))
                     self.present(alert, animated: true, completion: nil)
                 }
             @unknown default:
@@ -894,25 +871,22 @@ class SnapshotViewController: UIViewController {
     }
     
     private func setupAndStartRecognition() {
-        // Initialize the recognition request
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         guard let recognitionRequest = recognitionRequest else {
-            print("Unable to create recognition request")
+            print(NSLocalizedString("recognition_request_error", comment: ""))
             return
         }
         recognitionRequest.shouldReportPartialResults = true
         
-        // Configure the audio session for playback and recording
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
-            print("Audio session error: \(error)")
+            print(String(format: NSLocalizedString("audio_session_error", comment: ""), error.localizedDescription))
             return
         }
         
-        // Start the recognition task
         recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
             guard let self = self else { return }
             if let result = result {
@@ -920,8 +894,7 @@ class SnapshotViewController: UIViewController {
                 self.searchTextField.text = recognizedText
                 
                 if result.isFinal {
-                    let announcementFormat = NSLocalizedString("searching_for_speech", comment: "Speech synthesizer announcement for searching")
-                    let announcement = String(format: announcementFormat, recognizedText)
+                    let announcement = String(format: NSLocalizedString("searching_for_speech", comment: ""), recognizedText)
                     self.speak(announcement)
                     
                     self.updateSearchTerm(recognizedText)
@@ -930,12 +903,11 @@ class SnapshotViewController: UIViewController {
             }
             
             if let error = error {
-                print("Recognition error: \(error)")
+                print(String(format: NSLocalizedString("recognition_error", comment: ""), error.localizedDescription))
                 self.stopSpeechRecording()
             }
         }
         
-        // Configure the microphone input
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0,
@@ -944,22 +916,20 @@ class SnapshotViewController: UIViewController {
             self.recognitionRequest?.append(buffer)
         }
         
-        // Start the audio engine
         do {
             try audioEngine.start()
             micButton.setImage(UIImage(named: "microphone_active"), for: .normal)
-            micButton.backgroundColor = UIColor.red.withAlphaComponent(0.3) // Less intrusive red
+            micButton.backgroundColor = UIColor.red.withAlphaComponent(0.3)
             
             // Play "ding" sound to indicate mic activation
             dingPlayer?.play()
             
             print("Started recording speech...")
         } catch {
-            print("audioEngine couldn't start because of an error: \(error)")
+            print(String(format: NSLocalizedString("audio_engine_start_error", comment: ""), error.localizedDescription))
         }
     }
-
-
+    
     private func stopSpeechRecording() {
         if audioEngine.isRunning {
             audioEngine.stop()
@@ -977,31 +947,28 @@ class SnapshotViewController: UIViewController {
             
             print("Stopped recording speech.")
             
-            // Dismiss the listening alert if it's presented
             listeningAlert?.dismiss(animated: true, completion: nil)
             listeningAlert = nil
             
-            // Reset audio session to playback
             let audioSession = AVAudioSession.sharedInstance()
             do {
                 try audioSession.setCategory(.playback, mode: .default, options: [.mixWithOthers])
                 try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             } catch {
-                print("Audio session reset error: \(error)")
+                print(String(format: NSLocalizedString("audio_session_reset_error", comment: ""), error.localizedDescription))
             }
         }
     }
     
     private func presentTemporaryAlert() {
-        // Prevent multiple alerts
         if listeningAlert != nil {
             return
         }
         
-        listeningAlert = UIAlertController(title: nil, message: NSLocalizedString("listening", comment: "Listening indicator"), preferredStyle: .alert)
+        listeningAlert = UIAlertController(title: nil, message: NSLocalizedString("listening", comment: ""), preferredStyle: .alert)
         self.present(listeningAlert!, animated: true, completion: nil)
         
-        let listeningDuration: TimeInterval = 10.0  // Adjust as needed
+        let listeningDuration: TimeInterval = 5.0
         
         DispatchQueue.main.asyncAfter(deadline: .now() + listeningDuration) { [weak self] in
             guard let self = self else { return }
@@ -1021,10 +988,10 @@ class SnapshotViewController: UIViewController {
                 }
             case .denied, .restricted, .notDetermined:
                 DispatchQueue.main.async {
-                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: "Title for speech recognition alert"),
-                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: "Message for speech recognition alert"),
+                    let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: ""),
+                                                  message: NSLocalizedString("speech_recognition_unavailable_message", comment: ""),
                                                   preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: "OK button title"), style: .default, handler: nil))
+                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: ""), style: .default, handler: nil))
                     self.present(alert, animated: true, completion: nil)
                 }
             @unknown default:
@@ -1058,13 +1025,9 @@ extension SnapshotViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         
-        // Check if there is text to announce
         if let query = textField.text, !query.trimmingCharacters(in: .whitespaces).isEmpty {
-            let announcementFormat = NSLocalizedString("searching_for", comment: "Speech synthesizer announcement for searching")
-            let announcement = String(format: announcementFormat, query)
+            let announcement = String(format: NSLocalizedString("searching_for", comment: ""), query)
             speak(announcement)
-            
-            // Update search term and reprocess the image
             updateSearchTerm(query)
         }
         
