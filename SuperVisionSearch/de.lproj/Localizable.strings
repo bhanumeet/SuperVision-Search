@@ -87,3 +87,6 @@
 
 "speak_title" = "Sprechen";
 "speak_description" = "Tippen, um zu sprechen";
+
+
+"orientation_warning" = "Bitte halten Sie Ihr Telefon gerade oder drehen Sie es nach rechts";

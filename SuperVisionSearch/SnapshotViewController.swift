@@ -121,6 +121,9 @@ class SnapshotViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
         
+        // Begin generating orientation notifications.
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        
         setupScrollView()
         setupSearchBar()    // Ensure search bar is set up before buttons
         setupButtons()
@@ -150,16 +153,24 @@ class SnapshotViewController: UIViewController {
                                                selector: #selector(keyboardWillHide(notification:)),
                                                name: UIResponder.keyboardWillHideNotification,
                                                object: nil)
+        // Observe device orientation changes.
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(orientationChanged),
+                                               name: UIDevice.orientationDidChangeNotification,
+                                               object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        // Remove keyboard notifications
+        // Remove keyboard and orientation notifications
         NotificationCenter.default.removeObserver(self,
                                                   name: UIResponder.keyboardWillShowNotification,
                                                   object: nil)
         NotificationCenter.default.removeObserver(self,
                                                   name: UIResponder.keyboardWillHideNotification,
+                                                  object: nil)
+        NotificationCenter.default.removeObserver(self,
+                                                  name: UIDevice.orientationDidChangeNotification,
                                                   object: nil)
     }
     
@@ -167,6 +178,18 @@ class SnapshotViewController: UIViewController {
         super.viewDidAppear(animated)
         // Uncomment the next line if you want to start speech recording automatically.
         // startSpeechRecording()
+    }
+    
+    // MARK: - Orientation Change Handling
+    
+    @objc private func orientationChanged() {
+        // When the phone is rotated 90° to the left (device reports .landscapeLeft),
+        // we rotate the video 180° (upside down).
+        if UIDevice.current.orientation == .landscapeLeft {
+            self.imageView.transform = CGAffineTransform(rotationAngle: .pi)
+        } else {
+            self.imageView.transform = .identity
+        }
     }
     
     // MARK: - Layout Updates for Landscape Compatibility

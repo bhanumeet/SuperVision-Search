@@ -84,3 +84,9 @@
 
 "speak_title" = "Parler";
 "speak_description" = "Touchez pour parler";
+
+
+//phone hold warning
+
+"orientation_warning" = "Veuillez tenir votre téléphone droit ou le tourner vers la droite";
+

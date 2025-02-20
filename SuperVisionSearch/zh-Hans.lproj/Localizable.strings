@@ -87,3 +87,6 @@
 
 "speak_title" = "说话";
 "speak_description" = "点击说话";
+
+
+"orientation_warning" = "请保持手机正直或向右旋转";

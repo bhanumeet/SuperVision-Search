@@ -40,6 +40,21 @@ class ViewController: UIViewController {
         return slider
     }()
     
+    // Orientation warning label (now localized)
+    private let orientationWarningLabel: UILabel = {
+        let label = UILabel()
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.font = UIFont.boldSystemFont(ofSize: 18)
+        // Use the key "orientation_warning" for localization.
+        label.text = NSLocalizedString("orientation_warning", comment: "Orientation warning")
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: - Properties
     
     private var dingPlayer: AVAudioPlayer?
@@ -55,6 +70,9 @@ class ViewController: UIViewController {
     private var searchText: String = ""
     private var isSearching: Bool = false
     private var hasSpoken: Bool = false
+    
+    // Flag to avoid repeating the orientation warning
+    private var hasWarnedOrientation: Bool = false
     
     private let overlayView: UIView = {
         let v = UIView()
@@ -146,7 +164,7 @@ class ViewController: UIViewController {
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     
-    // Debounce Timer to Prevent Multiple Beeps
+    // Debounce Timer to Prevent Multiple Beeps (now 0.5 seconds)
     private var beepDebounceTimer: Timer?
     
     // MARK: - Lifecycle
@@ -188,23 +206,110 @@ class ViewController: UIViewController {
                                                name: NSNotification.Name("SnapshotViewDismissed"),
                                                object: nil)
         
-        setupAudioPlayers() // Setup sonar and beep players
+        setupAudioPlayers() // Setup sonar, beep, etc.
+        
+        // Add observer for device orientation changes
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(orientationChanged),
+                                               name: UIDevice.orientationDidChangeNotification,
+                                               object: nil)
+        
+        // Add the orientation warning label to the view hierarchy
+        view.addSubview(orientationWarningLabel)
+        NSLayoutConstraint.activate([
+            orientationWarningLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            orientationWarningLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            orientationWarningLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            orientationWarningLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 50)
+        ])
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
-    // MARK: - Layout Adjustments for Landscape Mode
+    // MARK: - Layout Updates for Orientation Changes
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Ensure the preview layer fills the entire view (for both portrait and landscape)
+        
+        // Ensure the preview layer always fills the view.
         previewLayer.frame = view.bounds
+        
+        // Update the video orientation to match the interface orientation.
+        if let connection = previewLayer.connection, connection.isVideoOrientationSupported {
+            connection.videoOrientation = currentVideoOrientation()
+        }
+    }
+    
+    private func currentVideoOrientation() -> AVCaptureVideoOrientation {
+        guard let windowScene = view.window?.windowScene else {
+            return .portrait
+        }
+        let interfaceOrientation = windowScene.interfaceOrientation
+        switch interfaceOrientation {
+        case .portrait:
+            return .portrait
+        case .landscapeRight:
+            return .landscapeRight
+        case .landscapeLeft:
+            return .landscapeLeft
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
+        default:
+            return .portrait
+        }
+    }
+    
+    // MARK: - Orientation Change Handling
+    @objc private func orientationChanged() {
+        // When the phone is rotated 90° to the left, we want to show the warning.
+        // We also rotate the previewLayer for landscapeLeft as before.
+//        if UIDevice.current.orientation == .landscapeLeft {
+//            previewLayer.setAffineTransform(CGAffineTransform(rotationAngle: .pi))
+//            if !hasWarnedOrientation {
+//                showOrientationWarning()
+//                hasWarnedOrientation = true
+//            }
+//        } else {
+//            previewLayer.setAffineTransform(CGAffineTransform.identity)
+//            if hasWarnedOrientation {
+//                hideOrientationWarning()
+//                hasWarnedOrientation = false
+//            }
+//        }
+        
+        
+        //NORMAL ORIENTATION SETTING
+        // Always use the default transform and hide any orientation warning.
+           previewLayer.setAffineTransform(CGAffineTransform.identity)
+           
+           if hasWarnedOrientation {
+               hideOrientationWarning()
+               hasWarnedOrientation = false
+           }
+    }
+    
+    private func showOrientationWarning() {
+        orientationWarningLabel.isHidden = false
+        let utterance = AVSpeechUtterance(string: NSLocalizedString("orientation_warning", comment: "Orientation warning"))
+        if let voice = AVSpeechSynthesisVoice(language: currentLanguageCode()) {
+            utterance.voice = voice
+        } else {
+            utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        }
+        speechSynthesizer.speak(utterance)
+    }
+    
+    private func hideOrientationWarning() {
+        orientationWarningLabel.isHidden = true
+        if speechSynthesizer.isSpeaking {
+            speechSynthesizer.stopSpeaking(at: .immediate)
+        }
     }
     
     // MARK: - Audio Players Setup
     private func setupAudioPlayers() {
-        
         if let dingURL = Bundle.main.url(forResource: "ding", withExtension: "mp3") {
             do {
                 dingPlayer = try AVAudioPlayer(contentsOf: dingURL)
@@ -315,6 +420,7 @@ class ViewController: UIViewController {
     private func setupCamera() {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .high
+        
         guard let device = AVCaptureDevice.default(for: .video) else { fatalError("No camera device found.") }
         guard let videoInput = try? AVCaptureDeviceInput(device: device) else { fatalError("Can't create camera input.") }
         if captureSession.canAddInput(videoInput) { captureSession.addInput(videoInput) }
@@ -329,7 +435,7 @@ class ViewController: UIViewController {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
         previewLayer.frame = view.bounds
-        view.layer.addSublayer(previewLayer)
+        view.layer.insertSublayer(previewLayer, at: 0)
         
         view.addSubview(overlayView)
         DispatchQueue.global(qos: .userInitiated).async { self.captureSession.startRunning() }
@@ -366,8 +472,9 @@ class ViewController: UIViewController {
         settingsButton.addTarget(self, action: #selector(openInfoScreen), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
+            // Increase the distance between scan and camera buttons by changing the constant to -32.
             scanButton.bottomAnchor.constraint(equalTo: textField.topAnchor, constant: -10),
-            scanButton.trailingAnchor.constraint(equalTo: cameraButton.leadingAnchor, constant: -16),
+            scanButton.trailingAnchor.constraint(equalTo: cameraButton.leadingAnchor, constant: -50),
             scanButton.widthAnchor.constraint(equalToConstant: 60),
             scanButton.heightAnchor.constraint(equalToConstant: 60),
             
@@ -564,6 +671,7 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard isSearching else { return }
         
         let visionImage = VisionImage(buffer: sampleBuffer)
+        // Note: The live feed orientation may require adjustment.
         visionImage.orientation = .right
         
         textRecognizer.process(visionImage) { [weak self] result, error in
@@ -574,6 +682,7 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
             }
             guard let result = result else { return }
             
+            // 1) Horizontal match check
             for block in result.blocks {
                 for line in block.lines {
                     let normalizedLineText = line.text.normalized()
@@ -584,13 +693,35 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                             self.highlightLiveBox(line.frame)
                             
                             if self.beepDebounceTimer == nil {
-                                print("Beep triggered for searchText: \(self.searchText)")
+                                print("Horizontal beep triggered for searchText: \(self.searchText)")
                                 self.beepPlayer?.play()
-                                self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                                // Use a 0.5-second timer for faster beeps.
+                                self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
                                     self.beepDebounceTimer = nil
                                 }
-                            } else {
-                                print("Beep debounce active. Skipping beep.")
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // 2) Vertical matching check
+            for block in result.blocks {
+                let sortedLines = block.lines.sorted { $0.frame.origin.y < $1.frame.origin.y }
+                let combinedString = sortedLines
+                    .map { $0.text.lowercased().normalized().replacingOccurrences(of: " ", with: "") }
+                    .joined()
+                
+                let normalizedSearchText = self.searchText.lowercased().normalized().replacingOccurrences(of: " ", with: "")
+                
+                if combinedString.contains(normalizedSearchText) {
+                    DispatchQueue.main.async {
+                        if self.beepDebounceTimer == nil {
+                            print("Vertical beep triggered for searchText: \(self.searchText)")
+                            self.beepPlayer?.play()
+                            // Again, a 0.5-second debounce timer.
+                            self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                                self.beepDebounceTimer = nil
                             }
                         }
                     }
@@ -685,7 +816,7 @@ extension ViewController {
                     let alert = UIAlertController(title: NSLocalizedString("speech_recognition_unavailable_title", comment: ""),
                                                   message: NSLocalizedString("speech_recognition_unavailable_message", comment: ""),
                                                   preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: ""), style: .default, handler: nil))
+                    alert.addAction(UIAlertAction(title: NSLocalizedString("ok_button", comment: ""), style: .default))
                     self.present(alert, animated: true, completion: nil)
                 }
             @unknown default:
@@ -748,10 +879,10 @@ extension ViewController {
         audioEngine.prepare()
         do {
             try audioEngine.start()
-            micButton.setImage(UIImage(named: "microphone_active"), for: .normal)
-            micButton.backgroundColor = UIColor.red.withAlphaComponent(0.5)
+            self.micButton.setImage(UIImage(named: "microphone_active"), for: .normal)
+            self.micButton.backgroundColor = UIColor.red.withAlphaComponent(0.5)
             print("Started recording speech...")
-            dingPlayer?.play()
+            self.dingPlayer?.play()
         } catch {
             print("audioEngine start error: \(error)")
         }
@@ -779,7 +910,7 @@ extension ViewController {
             print("Audio session reset error: \(error)")
         }
     }
-
+    
     private func presentTemporaryAlert() {
         let listeningMessage = NSLocalizedString("listening", comment: "Listening indicator")
         let alert = UIAlertController(title: nil, message: listeningMessage, preferredStyle: .alert)

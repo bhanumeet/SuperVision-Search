@@ -84,3 +84,6 @@
 
 "speak_title" = "बोलें";
 "speak_description" = "बोलने के लिए टैप करें";
+
+
+"orientation_warning" = "कृपया अपना फ़ोन सीधा रखें या इसे दाहिने घुमाएं";

@@ -84,3 +84,6 @@
 
 "speak_title" = "Parla";
 "speak_description" = "Tocca per parlare";
+
+
+"orientation_warning" = "Per favore, tieni il telefono dritto o ruotalo a destra";

@@ -103,3 +103,6 @@
 //"microphone_button_hint" = "Tap to start voice search.";
 //"microphone_active_button_hint" = "Voice search is active.";
 //"search_text_field_hint" = "Enter text to search in the image.";
+
+
+"orientation_warning" = "Please hold your phone straight or rotate it to the right";
