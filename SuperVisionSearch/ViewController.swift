@@ -167,6 +167,10 @@ class ViewController: UIViewController {
     // Debounce Timer to Prevent Multiple Beeps (now 0.5 seconds)
     private var beepDebounceTimer: Timer?
     
+    // MARK: - NEW PROPERTIES: Last recognized frame and bounding box
+    private var lastRecognizedFrame: UIImage?
+    private var lastRecognizedBoundingBox: CGRect?
+    
     // MARK: - Lifecycle
     
     override func viewWillAppear(_ animated: Bool) {
@@ -193,6 +197,11 @@ class ViewController: UIViewController {
         textField.delegate = self
         
         NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleSnapshotViewDismissed),
+                                               name: NSNotification.Name("SnapshotViewDismissed"),
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
                                                selector: #selector(keyboardWillShow(notification:)),
                                                name: UIResponder.keyboardWillShowNotification,
                                                object: nil)
@@ -213,6 +222,12 @@ class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(orientationChanged),
                                                name: UIDevice.orientationDidChangeNotification,
+                                               object: nil)
+        
+        // Add observer for app entering foreground
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(appWillEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
                                                object: nil)
         
         // Add the orientation warning label to the view hierarchy
@@ -263,31 +278,14 @@ class ViewController: UIViewController {
     
     // MARK: - Orientation Change Handling
     @objc private func orientationChanged() {
-        // When the phone is rotated 90° to the left, we want to show the warning.
-        // We also rotate the previewLayer for landscapeLeft as before.
-//        if UIDevice.current.orientation == .landscapeLeft {
-//            previewLayer.setAffineTransform(CGAffineTransform(rotationAngle: .pi))
-//            if !hasWarnedOrientation {
-//                showOrientationWarning()
-//                hasWarnedOrientation = true
-//            }
-//        } else {
-//            previewLayer.setAffineTransform(CGAffineTransform.identity)
-//            if hasWarnedOrientation {
-//                hideOrientationWarning()
-//                hasWarnedOrientation = false
-//            }
-//        }
-        
-        
         //NORMAL ORIENTATION SETTING
         // Always use the default transform and hide any orientation warning.
-           previewLayer.setAffineTransform(CGAffineTransform.identity)
-           
-           if hasWarnedOrientation {
-               hideOrientationWarning()
-               hasWarnedOrientation = false
-           }
+        previewLayer.setAffineTransform(CGAffineTransform.identity)
+        
+        if hasWarnedOrientation {
+            hideOrientationWarning()
+            hasWarnedOrientation = false
+        }
     }
     
     private func showOrientationWarning() {
@@ -305,6 +303,27 @@ class ViewController: UIViewController {
         orientationWarningLabel.isHidden = true
         if speechSynthesizer.isSpeaking {
             speechSynthesizer.stopSpeaking(at: .immediate)
+        }
+    }
+    
+    // MARK: - App Entering Foreground Handling
+    @objc private func appWillEnterForeground() {
+        // Check the torch state and update the UI
+        updateTorchButtonImage()
+    }
+    
+    private func updateTorchButtonImage() {
+        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else {
+            print("Torch not available.")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            if device.torchMode == .on {
+                self.torchButton.setImage(UIImage(named: "torchOn"), for: .normal)
+            } else {
+                self.torchButton.setImage(UIImage(named: "torch"), for: .normal)
+            }
         }
     }
     
@@ -361,12 +380,18 @@ class ViewController: UIViewController {
     }
     
     @objc private func handleSnapshotViewDismissed() {
+        // Clear any previously recognized frame/bounding box
+        lastRecognizedFrame = nil
+        lastRecognizedBoundingBox = nil
+
+        // Resume the camera session if it's not already running
         DispatchQueue.global(qos: .userInitiated).async {
             if !self.captureSession.isRunning {
                 self.captureSession.startRunning()
             }
         }
     }
+
     
     // MARK: - Keyboard Handling
     @objc private func keyboardWillShow(notification: Notification) {
@@ -479,7 +504,7 @@ class ViewController: UIViewController {
             scanButton.heightAnchor.constraint(equalToConstant: 60),
             
             cameraButton.bottomAnchor.constraint(equalTo: textField.topAnchor, constant: -10),
-            cameraButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 32),
+            cameraButton.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 50),
             cameraButton.widthAnchor.constraint(equalToConstant: 60),
             cameraButton.heightAnchor.constraint(equalToConstant: 60),
             
@@ -558,7 +583,22 @@ class ViewController: UIViewController {
     @objc private func scanTouchUp() {
         audioPlayer?.stop()
         isSearching = false
-        cameraButtonTapped()
+        
+        // -- NEW LOGIC: If we have a last recognized frame and bounding box, use them.
+        // Otherwise, fall back to the existing camera capture logic.
+        if let lastFrame = lastRecognizedFrame,
+           let boundingBox = lastRecognizedBoundingBox {
+            
+            DispatchQueue.main.async {
+                let snapshotVC = SnapshotViewController(image: lastFrame, searchTerm: self.searchText)
+                snapshotVC.recognizedBoundingBox = boundingBox
+                snapshotVC.modalPresentationStyle = .fullScreen
+                self.present(snapshotVC, animated: true, completion: nil)
+            }
+        } else {
+            // Fallback: if no recognized frame was captured, just proceed with the normal flow
+            cameraButtonTapped()
+        }
     }
     
     @objc private func cameraButtonTapped() {
@@ -616,6 +656,7 @@ class ViewController: UIViewController {
             print("Torch not available.")
             return
         }
+        
         do {
             try device.lockForConfiguration()
             if device.torchMode == .on {
@@ -692,10 +733,15 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         DispatchQueue.main.async {
                             self.highlightLiveBox(line.frame)
                             
+                            // NEW: Store this frame as the "last recognized"
+                            if let capturedImage = self.uiImageFromSampleBuffer(sampleBuffer) {
+                                self.lastRecognizedFrame = capturedImage
+                                self.lastRecognizedBoundingBox = line.frame
+                            }
+                            
                             if self.beepDebounceTimer == nil {
                                 print("Horizontal beep triggered for searchText: \(self.searchText)")
                                 self.beepPlayer?.play()
-                                // Use a 0.5-second timer for faster beeps.
                                 self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
                                     self.beepDebounceTimer = nil
                                 }
@@ -719,7 +765,6 @@ extension ViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
                         if self.beepDebounceTimer == nil {
                             print("Vertical beep triggered for searchText: \(self.searchText)")
                             self.beepPlayer?.play()
-                            // Again, a 0.5-second debounce timer.
                             self.beepDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
                                 self.beepDebounceTimer = nil
                             }
@@ -916,7 +961,7 @@ extension ViewController {
         let alert = UIAlertController(title: nil, message: listeningMessage, preferredStyle: .alert)
         self.present(alert, animated: true, completion: nil)
         
-        let listeningDuration: TimeInterval = 2.0
+        let listeningDuration: TimeInterval = 5.0
         
         DispatchQueue.main.asyncAfter(deadline: .now() + listeningDuration) {
             self.stopSpeechRecording()

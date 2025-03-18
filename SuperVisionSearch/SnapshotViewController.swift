@@ -98,6 +98,13 @@ class SnapshotViewController: UIViewController {
     // Temporary Alert for Listening Status
     private var listeningAlert: UIAlertController?
     
+    // -------------
+    // NEW PROPERTY:
+    // -------------
+    // If you captured a specific bounding box from the live feed,
+    // you can pass it into this SnapshotViewController and it'll underline it.
+    var recognizedBoundingBox: CGRect?
+    
     // MARK: - Initializer
     
     init(image: UIImage, searchTerm: String) {
@@ -121,8 +128,7 @@ class SnapshotViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .black
         
-        // Begin generating orientation notifications.
-        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        // Removed orientation notifications since only portrait mode is supported.
         
         setupScrollView()
         setupSearchBar()    // Ensure search bar is set up before buttons
@@ -153,46 +159,19 @@ class SnapshotViewController: UIViewController {
                                                selector: #selector(keyboardWillHide(notification:)),
                                                name: UIResponder.keyboardWillHideNotification,
                                                object: nil)
-        // Observe device orientation changes.
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(orientationChanged),
-                                               name: UIDevice.orientationDidChangeNotification,
-                                               object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        // Remove keyboard and orientation notifications
+        // Remove keyboard notifications
         NotificationCenter.default.removeObserver(self,
                                                   name: UIResponder.keyboardWillShowNotification,
                                                   object: nil)
         NotificationCenter.default.removeObserver(self,
                                                   name: UIResponder.keyboardWillHideNotification,
                                                   object: nil)
-        NotificationCenter.default.removeObserver(self,
-                                                  name: UIDevice.orientationDidChangeNotification,
-                                                  object: nil)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        // Uncomment the next line if you want to start speech recording automatically.
-        // startSpeechRecording()
-    }
-    
-    // MARK: - Orientation Change Handling
-    
-    @objc private func orientationChanged() {
-        // When the phone is rotated 90° to the left (device reports .landscapeLeft),
-        // we rotate the video 180° (upside down).
-        if UIDevice.current.orientation == .landscapeLeft {
-            self.imageView.transform = CGAffineTransform(rotationAngle: .pi)
-        } else {
-            self.imageView.transform = .identity
-        }
-    }
-    
-    // MARK: - Layout Updates for Landscape Compatibility
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -401,6 +380,8 @@ class SnapshotViewController: UIViewController {
                 return
             }
             guard let result = result else { return }
+            
+            
 
             print("Initial OCR Result:")
             for block in result.blocks {
@@ -489,7 +470,51 @@ class SnapshotViewController: UIViewController {
             if layer is CAShapeLayer { layer.removeFromSuperlayer() }
         }
         frames.removeAll()
-
+        
+        //--------------------------------------------------------
+        // NEW LOGIC: Underline recognizedBoundingBox if provided
+        //--------------------------------------------------------
+        if let recognizedBox = recognizedBoundingBox {
+            // Calculate scale and image offset (same as red highlight)
+            let scaleWidth = imageView.bounds.width / image.size.width
+            let scaleHeight = imageView.bounds.height / image.size.height
+            let scale = min(scaleWidth, scaleHeight)
+            
+            let imageWidth = image.size.width * scale
+            let imageHeight = image.size.height * scale
+            let imageX = (imageView.bounds.width - imageWidth) / 2.0
+            let imageY = (imageView.bounds.height - imageHeight) / 2.0
+            
+            // Draw the underline using the recognizedBox coordinates in the image coordinate system.
+            // No manual transformation here.
+            let underlinePath = UIBezierPath()
+            underlinePath.move(to: CGPoint(x: recognizedBox.origin.x, y: recognizedBox.origin.y + recognizedBox.size.height + 5))
+            underlinePath.addLine(to: CGPoint(x: recognizedBox.origin.x + recognizedBox.size.width, y: recognizedBox.origin.y + recognizedBox.size.height + 5))
+            
+            let boundingLayer = CAShapeLayer()
+            boundingLayer.path = underlinePath.cgPath
+            boundingLayer.strokeColor = UIColor.yellow.cgColor
+            boundingLayer.lineWidth = 7.0
+            // Position the layer to offset the image in the imageView
+            boundingLayer.position = CGPoint(x: imageY, y: imageX)
+            // Apply the same scaling as the red underline
+            //boundingLayer.transform = CATransform3DMakeScale(scale, scale, 1)
+            
+            let blinkAnimation = CABasicAnimation(keyPath: "opacity")
+            blinkAnimation.fromValue = 1.0
+            blinkAnimation.toValue = 0.0
+            blinkAnimation.duration = 0.5
+            blinkAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            blinkAnimation.autoreverses = true
+            blinkAnimation.repeatCount = .infinity
+            boundingLayer.add(blinkAnimation, forKey: "blink")
+            
+            imageView.layer.addSublayer(boundingLayer)
+        }
+        //--------------------------------------------------------
+        // END of recognizedBoundingBox logic
+        //--------------------------------------------------------
+        
         // If searching for multiple words, find adjacent matches
         if individualSearchTerms.count > 1 {
             for block in result.blocks {
@@ -501,7 +526,7 @@ class SnapshotViewController: UIViewController {
                         var matchingElements = [TextElement]()
                         for (index, searchTerm) in individualSearchTerms.enumerated() {
                             if i + index >= elements.count ||
-                               !isPotentialMatch(for: elements[i + index].text, keyword: searchTerm) {
+                                !isPotentialMatch(for: elements[i + index].text, keyword: searchTerm) {
                                 matchFound = false
                                 break
                             }
@@ -540,8 +565,8 @@ class SnapshotViewController: UIViewController {
                             
                             let blinkLayer = CAShapeLayer()
                             blinkLayer.path = underlinePath.cgPath
-                            blinkLayer.strokeColor = UIColor.green.cgColor
-                            blinkLayer.lineWidth = 7.0
+                            blinkLayer.strokeColor = UIColor.red.cgColor
+                            blinkLayer.lineWidth = 12.0
                             blinkLayer.position = CGPoint(x: imageX, y: imageY)
                             blinkLayer.transform = CATransform3DMakeScale(scale, scale, 1)
                             imageView.layer.addSublayer(blinkLayer)
@@ -597,9 +622,9 @@ class SnapshotViewController: UIViewController {
                                 
                                 let blinkLayer = CAShapeLayer()
                                 blinkLayer.path = underlinePath.cgPath
-                                blinkLayer.strokeColor = UIColor.green.cgColor
-                                blinkLayer.lineWidth = 7.0
-                                blinkLayer.position = CGPoint(x: imageX, y: imageY)
+                                blinkLayer.strokeColor = UIColor.red.cgColor
+                                blinkLayer.lineWidth = 20.0
+                                blinkLayer.position = CGPoint(x: imageX, y: imageY + 5)
                                 blinkLayer.transform = CATransform3DMakeScale(scale, scale, 1)
                                 imageView.layer.addSublayer(blinkLayer)
                                 
@@ -617,7 +642,7 @@ class SnapshotViewController: UIViewController {
                 }
             }
         }
-
+        
         DispatchQueue.main.async {
             self.imageView.image = image
             self.scrollView.zoomScale = 1.0
@@ -640,6 +665,7 @@ class SnapshotViewController: UIViewController {
             }
         }
     }
+
     
     // Helper function to check for a substring match (with fuzzy matching).
     private func containsSearchTerm(_ text: String, searchTerm: String) -> Bool {
@@ -749,10 +775,8 @@ class SnapshotViewController: UIViewController {
         let imageX = (imageView.bounds.width - imageWidth) / 2.0
         let imageY = (imageView.bounds.height - imageHeight) / 2.0
         
-        let imageFrameInView = CGRect(x: imageX, y: imageY, width: imageWidth, height: imageHeight)
-        
-        let normalizedX = frame.origin.x * scale + imageFrameInView.origin.x
-        let normalizedY = frame.origin.y * scale + imageFrameInView.origin.y
+        let normalizedX = frame.origin.x * scale + imageX
+        let normalizedY = frame.origin.y * scale + imageY
         let normalizedWidth = frame.size.width * scale
         let normalizedHeight = frame.size.height * scale
         let targetRect = CGRect(x: normalizedX, y: normalizedY, width: normalizedWidth, height: normalizedHeight)
@@ -792,9 +816,11 @@ class SnapshotViewController: UIViewController {
     
     @objc private func backTapped() {
         dismiss(animated: true) {
+            // Post a notification so the ViewController knows SnapshotViewController was dismissed.
             NotificationCenter.default.post(name: NSNotification.Name("SnapshotViewDismissed"), object: nil)
         }
     }
+
     
     @objc private func zoomInTapped() {
         guard !frames.isEmpty else {
