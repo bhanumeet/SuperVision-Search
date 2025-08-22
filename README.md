@@ -1,5 +1,6 @@
 # SuperVision Search
 
+<img width="1536" height="1024" alt="SVS" src="https://github.com/user-attachments/assets/1f4fa2b5-6792-42b0-8fe2-ec3818035584" />
 
 **SuperVision Search** is an advanced iOS accessibility application that combines real-time text recognition with intelligent search capabilities. Designed to assist users in finding specific text within their environment, the app provides audio feedback, voice commands, and comprehensive text detection features.
 
